@@ -3,6 +3,8 @@ package com.dbbackup.backup;
 import com.dbbackup.db.DatabaseConnector;
 import com.dbbackup.db.MySQLConnector;
 import com.dbbackup.db.PostgreSQLConnector;
+import com.dbbackup.db.MongoDBConnector;
+import com.dbbackup.db.SQLiteConnector;
 import java.io.File;
 
 public class BackupServiceImpl implements BackupService {
@@ -23,6 +25,11 @@ public class BackupServiceImpl implements BackupService {
             return new MySQLConnector(host, porta, usuario, senha, nomeBanco);
         } else if ("postgresql".equalsIgnoreCase(tipoBanco)) {
             return new PostgreSQLConnector(host, porta, usuario, senha, nomeBanco);
+        } else if ("mongodb".equalsIgnoreCase(tipoBanco)) {
+            return new MongoDBConnector(host, porta, usuario, senha, nomeBanco);
+        } else if ("sqlite".equalsIgnoreCase(tipoBanco)) {
+            // Para SQLite, o parâmetro nomeBanco pode ser usado como caminho do arquivo
+            return new SQLiteConnector(nomeBanco);
         }
         throw new UnsupportedOperationException("Tipo de banco não suportado: " + tipoBanco);
     }

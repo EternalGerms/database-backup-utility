@@ -2,8 +2,6 @@ package com.dbbackup.db;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.lang.ProcessBuilder;
-import java.lang.Process;
 
 public class MySQLConnector implements DatabaseConnector {
     private String host;
@@ -34,16 +32,60 @@ public class MySQLConnector implements DatabaseConnector {
 
     @Override
     public boolean realizarBackup(File destino, String tipoBackup) throws Exception {
-        // TODO: Implementar lógica de backup (mysqldump, etc.)
-        System.out.println("Realizando backup do MySQL para: " + destino.getAbsolutePath());
-        return true;
+        String[] command = {
+            "mysqldump",
+            "-h" + host,
+            "-P" + porta,
+            "-u" + usuario,
+            "-p" + senha,
+            nomeBanco
+        };
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+        Process process = pb.start();
+
+        // Redireciona a saída do processo para o arquivo de destino
+        try (java.io.InputStream is = process.getInputStream();
+             java.io.FileOutputStream fos = new java.io.FileOutputStream(destino)) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode == 0) {
+            System.out.println("Backup do MySQL realizado com sucesso!");
+            return true;
+        } else {
+            System.out.println("Falha ao realizar backup do MySQL. Código de saída: " + exitCode);
+            return false;
+        }
     }
 
     @Override
     public boolean restaurarBackup(File arquivoBackup) throws Exception {
-        // TODO: Implementar lógica de restauração
-        System.out.println("Restaurando backup do MySQL a partir de: " + arquivoBackup.getAbsolutePath());
-        return true;
+        String[] command = {
+            "mysql",
+            "-h", host,
+            "-P", String.valueOf(porta),
+            "-u", usuario,
+            "-p" + senha,
+            nomeBanco
+        };
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+        pb.redirectInput(arquivoBackup);
+        Process process = pb.start();
+        int exitCode = process.waitFor();
+        if (exitCode == 0) {
+            System.out.println("Restauração do MySQL realizada com sucesso!");
+            return true;
+        } else {
+            System.out.println("Falha ao restaurar backup do MySQL. Código de saída: " + exitCode);
+            return false;
+        }
     }
 
     @Override

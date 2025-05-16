@@ -80,10 +80,16 @@ public class DatabaseBackupCLI implements Runnable {
     }
 
     private boolean parametrosValidosBackup() {
+        if ("sqlite".equalsIgnoreCase(tipoBanco)) {
+            return nomeBanco != null && caminhoArquivo != null;
+        }
         return tipoBanco != null && usuario != null && senha != null && nomeBanco != null && caminhoArquivo != null;
     }
 
     private boolean parametrosValidosRestore() {
+        if ("sqlite".equalsIgnoreCase(tipoBanco)) {
+            return nomeBanco != null && caminhoArquivo != null;
+        }
         return tipoBanco != null && usuario != null && senha != null && nomeBanco != null && caminhoArquivo != null;
     }
 } 
