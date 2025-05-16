@@ -2,6 +2,7 @@ package com.dbbackup.backup;
 
 import com.dbbackup.db.DatabaseConnector;
 import com.dbbackup.db.MySQLConnector;
+import com.dbbackup.db.PostgreSQLConnector;
 import java.io.File;
 
 public class BackupServiceImpl implements BackupService {
@@ -20,6 +21,8 @@ public class BackupServiceImpl implements BackupService {
     private DatabaseConnector getConnector(String tipoBanco, String host, int porta, String usuario, String senha, String nomeBanco) {
         if ("mysql".equalsIgnoreCase(tipoBanco)) {
             return new MySQLConnector(host, porta, usuario, senha, nomeBanco);
+        } else if ("postgresql".equalsIgnoreCase(tipoBanco)) {
+            return new PostgreSQLConnector(host, porta, usuario, senha, nomeBanco);
         }
         throw new UnsupportedOperationException("Tipo de banco não suportado: " + tipoBanco);
     }
