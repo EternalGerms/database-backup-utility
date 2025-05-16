@@ -1,0 +1,5 @@
+com\dbbackup\backup\BackupServiceImpl.class
+com\dbbackup\cli\DatabaseBackupCLI.class
+com\dbbackup\db\DatabaseConnector.class
+com\dbbackup\backup\BackupService.class
+com\dbbackup\db\MySQLConnector.class
