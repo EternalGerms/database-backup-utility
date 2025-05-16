@@ -1,5 +1,8 @@
 com\dbbackup\backup\BackupServiceImpl.class
-com\dbbackup\cli\DatabaseBackupCLI.class
 com\dbbackup\db\DatabaseConnector.class
+com\dbbackup\db\SQLiteConnector.class
 com\dbbackup\backup\BackupService.class
+com\dbbackup\cli\DatabaseBackupCLI.class
+com\dbbackup\db\PostgreSQLConnector.class
+com\dbbackup\db\MongoDBConnector.class
 com\dbbackup\db\MySQLConnector.class

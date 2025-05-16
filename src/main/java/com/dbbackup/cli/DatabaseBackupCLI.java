@@ -53,6 +53,9 @@ public class DatabaseBackupCLI implements Runnable {
         try {
             if (backup) {
                 if (parametrosValidosBackup()) {
+                    System.out.println("tipoBanco: " + tipoBanco);
+                    System.out.println("nomeBanco: " + nomeBanco);
+                    System.out.println("caminhoArquivo: " + caminhoArquivo);
                     boolean sucesso = backupService.executarBackup(
                         tipoBanco, host, porta, usuario, senha, nomeBanco,
                         new File(caminhoArquivo), tipoBackup
@@ -63,6 +66,9 @@ public class DatabaseBackupCLI implements Runnable {
                 }
             } else if (restore) {
                 if (parametrosValidosRestore()) {
+                    System.out.println("tipoBanco: " + tipoBanco);
+                    System.out.println("nomeBanco: " + nomeBanco);
+                    System.out.println("caminhoArquivo: " + caminhoArquivo);
                     boolean sucesso = backupService.restaurar(
                         tipoBanco, new File(caminhoArquivo), host, porta, usuario, senha, nomeBanco
                     );
@@ -81,15 +87,23 @@ public class DatabaseBackupCLI implements Runnable {
 
     private boolean parametrosValidosBackup() {
         if ("sqlite".equalsIgnoreCase(tipoBanco)) {
-            return nomeBanco != null && caminhoArquivo != null;
+            return nomeBanco != null && !nomeBanco.isBlank() && caminhoArquivo != null && !caminhoArquivo.isBlank();
         }
-        return tipoBanco != null && usuario != null && senha != null && nomeBanco != null && caminhoArquivo != null;
+        return tipoBanco != null && !tipoBanco.isBlank()
+            && usuario != null && !usuario.isBlank()
+            && senha != null && !senha.isBlank()
+            && nomeBanco != null && !nomeBanco.isBlank()
+            && caminhoArquivo != null && !caminhoArquivo.isBlank();
     }
 
     private boolean parametrosValidosRestore() {
         if ("sqlite".equalsIgnoreCase(tipoBanco)) {
-            return nomeBanco != null && caminhoArquivo != null;
+            return nomeBanco != null && !nomeBanco.isBlank() && caminhoArquivo != null && !caminhoArquivo.isBlank();
         }
-        return tipoBanco != null && usuario != null && senha != null && nomeBanco != null && caminhoArquivo != null;
+        return tipoBanco != null && !tipoBanco.isBlank()
+            && usuario != null && !usuario.isBlank()
+            && senha != null && !senha.isBlank()
+            && nomeBanco != null && !nomeBanco.isBlank()
+            && caminhoArquivo != null && !caminhoArquivo.isBlank();
     }
 } 
