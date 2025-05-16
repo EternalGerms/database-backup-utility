@@ -3,6 +3,8 @@ package com.dbbackup.db;
 import java.io.File;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MongoDBConnector implements DatabaseConnector {
     private String host;
@@ -36,12 +38,34 @@ public class MongoDBConnector implements DatabaseConnector {
     public boolean realizarBackup(File destino, String tipoBackup) throws Exception {
         // Backup usando mongodump
         String dumpDir = destino.getParent();
-        String dumpCommand = String.format(
-            "mongodump --host %s --port %d --username %s --password %s --db %s --out %s",
-            host, porta, usuario, senha, nomeBanco, dumpDir
-        );
-        ProcessBuilder pb = new ProcessBuilder();
-        pb.command("bash", "-c", dumpCommand);
+        String os = System.getProperty("os.name").toLowerCase();
+        ProcessBuilder pb;
+        if (os.contains("win")) {
+            List<String> command = new ArrayList<>();
+            command.add("mongodump");
+            command.add("--host"); command.add(host);
+            command.add("--port"); command.add(String.valueOf(porta));
+            if (usuario != null && !usuario.isBlank()) {
+                command.add("--username"); command.add(usuario);
+            }
+            if (senha != null && !senha.isBlank()) {
+                command.add("--password"); command.add(senha);
+            }
+            command.add("--db"); command.add(nomeBanco);
+            command.add("--out"); command.add(dumpDir);
+            pb = new ProcessBuilder(command);
+        } else {
+            StringBuilder dumpCommand = new StringBuilder();
+            dumpCommand.append(String.format("mongodump --host %s --port %d ", host, porta));
+            if (usuario != null && !usuario.isBlank()) {
+                dumpCommand.append(String.format("--username %s ", usuario));
+            }
+            if (senha != null && !senha.isBlank()) {
+                dumpCommand.append(String.format("--password %s ", senha));
+            }
+            dumpCommand.append(String.format("--db %s --out %s", nomeBanco, dumpDir));
+            pb = new ProcessBuilder("bash", "-c", dumpCommand.toString());
+        }
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         Process process = pb.start();
         int exitCode = process.waitFor();
@@ -56,13 +80,34 @@ public class MongoDBConnector implements DatabaseConnector {
 
     @Override
     public boolean restaurarBackup(File arquivoBackup) throws Exception {
-        // Restauração usando mongorestore
-        String restoreCommand = String.format(
-            "mongorestore --host %s --port %d --username %s --password %s --db %s %s",
-            host, porta, usuario, senha, nomeBanco, arquivoBackup.getAbsolutePath()
-        );
-        ProcessBuilder pb = new ProcessBuilder();
-        pb.command("bash", "-c", restoreCommand);
+        String os = System.getProperty("os.name").toLowerCase();
+        ProcessBuilder pb;
+        if (os.contains("win")) {
+            List<String> command = new ArrayList<>();
+            command.add("mongorestore");
+            command.add("--host"); command.add(host);
+            command.add("--port"); command.add(String.valueOf(porta));
+            if (usuario != null && !usuario.isBlank()) {
+                command.add("--username"); command.add(usuario);
+            }
+            if (senha != null && !senha.isBlank()) {
+                command.add("--password"); command.add(senha);
+            }
+            command.add("--db"); command.add(nomeBanco);
+            command.add(arquivoBackup.getAbsolutePath());
+            pb = new ProcessBuilder(command);
+        } else {
+            StringBuilder restoreCommand = new StringBuilder();
+            restoreCommand.append(String.format("mongorestore --host %s --port %d ", host, porta));
+            if (usuario != null && !usuario.isBlank()) {
+                restoreCommand.append(String.format("--username %s ", usuario));
+            }
+            if (senha != null && !senha.isBlank()) {
+                restoreCommand.append(String.format("--password %s ", senha));
+            }
+            restoreCommand.append(String.format("--db %s %s", nomeBanco, arquivoBackup.getAbsolutePath()));
+            pb = new ProcessBuilder("bash", "-c", restoreCommand.toString());
+        }
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         Process process = pb.start();
         int exitCode = process.waitFor();

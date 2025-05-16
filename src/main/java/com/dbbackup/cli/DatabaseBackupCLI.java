@@ -89,6 +89,11 @@ public class DatabaseBackupCLI implements Runnable {
         if ("sqlite".equalsIgnoreCase(tipoBanco)) {
             return nomeBanco != null && !nomeBanco.isBlank() && caminhoArquivo != null && !caminhoArquivo.isBlank();
         }
+        if ("mongodb".equalsIgnoreCase(tipoBanco)) {
+            return tipoBanco != null && !tipoBanco.isBlank()
+                && nomeBanco != null && !nomeBanco.isBlank()
+                && caminhoArquivo != null && !caminhoArquivo.isBlank();
+        }
         return tipoBanco != null && !tipoBanco.isBlank()
             && usuario != null && !usuario.isBlank()
             && senha != null && !senha.isBlank()
@@ -99,6 +104,11 @@ public class DatabaseBackupCLI implements Runnable {
     private boolean parametrosValidosRestore() {
         if ("sqlite".equalsIgnoreCase(tipoBanco)) {
             return nomeBanco != null && !nomeBanco.isBlank() && caminhoArquivo != null && !caminhoArquivo.isBlank();
+        }
+        if ("mongodb".equalsIgnoreCase(tipoBanco)) {
+            return tipoBanco != null && !tipoBanco.isBlank()
+                && nomeBanco != null && !nomeBanco.isBlank()
+                && caminhoArquivo != null && !caminhoArquivo.isBlank();
         }
         return tipoBanco != null && !tipoBanco.isBlank()
             && usuario != null && !usuario.isBlank()
