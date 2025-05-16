@@ -6,8 +6,13 @@
     <artifactId>database-backup</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
+<<<<<<< HEAD
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+=======
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+>>>>>>> 9288f5d (feat(mysql): implementa backup e restauração reais via mysqldump e mysql)
     </properties>
     <dependencies>
         <!-- Picocli for CLI -->
@@ -40,6 +45,15 @@
             <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
+<<<<<<< HEAD
+=======
+        <!-- MySQL Connector/J -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+>>>>>>> 9288f5d (feat(mysql): implementa backup e restauração reais via mysqldump e mysql)
     </dependencies>
     <build>
         <plugins>
@@ -48,10 +62,50 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
+<<<<<<< HEAD
                     <source>11</source>
                     <target>11</target>
                 </configuration>
             </plugin>
+=======
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.dbbackup.cli.DatabaseBackupCLI</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.dbbackup.cli.DatabaseBackupCLI</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+>>>>>>> 9288f5d (feat(mysql): implementa backup e restauração reais via mysqldump e mysql)
         </plugins>
     </build>
 </project> 
