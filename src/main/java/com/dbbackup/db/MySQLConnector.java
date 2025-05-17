@@ -2,6 +2,9 @@ package com.dbbackup.db;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.zip.GZIPOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 public class MySQLConnector implements DatabaseConnector {
     private String host;
@@ -31,27 +34,46 @@ public class MySQLConnector implements DatabaseConnector {
     }
 
     @Override
-    public boolean realizarBackup(File destino, String tipoBackup) throws Exception {
-        String[] command = {
-            "mysqldump",
-            "-h" + host,
-            "-P" + porta,
-            "-u" + usuario,
-            "-p" + senha,
-            nomeBanco
-        };
+    public boolean realizarBackup(File destino, String tipoBackup, boolean comprimir) throws Exception {
+        if (tipoBackup != null && !tipoBackup.equalsIgnoreCase("completo")) {
+            throw new UnsupportedOperationException("Backup '" + tipoBackup + "' não suportado para MySQL. Apenas backup completo é suportado.");
+        }
+        java.util.List<String> commandList = new java.util.ArrayList<>();
+        commandList.add("mysqldump");
+        commandList.add("-h" + host);
+        commandList.add("-P" + porta);
+        commandList.add("-u" + usuario);
+        if (senha != null && !senha.isEmpty()) {
+            commandList.add("-p" + senha);
+        }
+        commandList.add(nomeBanco);
+        String[] command = commandList.toArray(new String[0]);
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         Process process = pb.start();
 
-        // Redireciona a saída do processo para o arquivo de destino
-        try (java.io.InputStream is = process.getInputStream();
-             java.io.FileOutputStream fos = new java.io.FileOutputStream(destino)) {
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = is.read(buffer)) != -1) {
-                fos.write(buffer, 0, bytesRead);
+        if (comprimir) {
+            File gzFile = new File(destino.getAbsolutePath() + ".gz");
+            try (java.io.InputStream is = process.getInputStream();
+                 java.io.FileOutputStream fos = new java.io.FileOutputStream(gzFile);
+                 java.util.zip.GZIPOutputStream gzos = new java.util.zip.GZIPOutputStream(fos)) {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    gzos.write(buffer, 0, bytesRead);
+                }
             }
+            System.out.println("Backup do MySQL compactado em: " + gzFile.getAbsolutePath());
+        } else {
+            try (java.io.InputStream is = process.getInputStream();
+                 java.io.FileOutputStream fos = new java.io.FileOutputStream(destino)) {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    fos.write(buffer, 0, bytesRead);
+                }
+            }
+            System.out.println("Backup do MySQL salvo em: " + destino.getAbsolutePath());
         }
 
         int exitCode = process.waitFor();
@@ -66,14 +88,19 @@ public class MySQLConnector implements DatabaseConnector {
 
     @Override
     public boolean restaurarBackup(File arquivoBackup) throws Exception {
-        String[] command = {
-            "mysql",
-            "-h", host,
-            "-P", String.valueOf(porta),
-            "-u", usuario,
-            "-p" + senha,
-            nomeBanco
-        };
+        java.util.List<String> commandList = new java.util.ArrayList<>();
+        commandList.add("mysql");
+        commandList.add("-h");
+        commandList.add(host);
+        commandList.add("-P");
+        commandList.add(String.valueOf(porta));
+        commandList.add("-u");
+        commandList.add(usuario);
+        if (senha != null && !senha.isEmpty()) {
+            commandList.add("-p" + senha);
+        }
+        commandList.add(nomeBanco);
+        String[] command = commandList.toArray(new String[0]);
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.redirectError(ProcessBuilder.Redirect.INHERIT);
         pb.redirectInput(arquivoBackup);

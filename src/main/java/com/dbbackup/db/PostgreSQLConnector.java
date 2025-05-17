@@ -3,6 +3,9 @@ package com.dbbackup.db;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.zip.GZIPOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 public class PostgreSQLConnector implements DatabaseConnector {
     private String host;
@@ -32,7 +35,10 @@ public class PostgreSQLConnector implements DatabaseConnector {
     }
 
     @Override
-    public boolean realizarBackup(File destino, String tipoBackup) throws Exception {
+    public boolean realizarBackup(File destino, String tipoBackup, boolean comprimir) throws Exception {
+        if (tipoBackup != null && !tipoBackup.equalsIgnoreCase("completo")) {
+            throw new UnsupportedOperationException("Backup '" + tipoBackup + "' não suportado para PostgreSQL. Apenas backup completo é suportado.");
+        }
         // Backup usando pg_dump
         String[] command = {
             "pg_dump",
@@ -49,6 +55,20 @@ public class PostgreSQLConnector implements DatabaseConnector {
         Process process = pb.start();
         int exitCode = process.waitFor();
         if (exitCode == 0) {
+            if (comprimir) {
+                File gzFile = new File(destino.getAbsolutePath() + ".gz");
+                try (FileInputStream fis = new FileInputStream(destino);
+                     FileOutputStream fos = new FileOutputStream(gzFile);
+                     GZIPOutputStream gzos = new GZIPOutputStream(fos)) {
+                    byte[] buffer = new byte[4096];
+                    int len;
+                    while ((len = fis.read(buffer)) > 0) {
+                        gzos.write(buffer, 0, len);
+                    }
+                }
+                destino.delete();
+                System.out.println("Backup do PostgreSQL compactado em: " + gzFile.getAbsolutePath());
+            }
             System.out.println("Backup do PostgreSQL realizado com sucesso!");
             return true;
         } else {
