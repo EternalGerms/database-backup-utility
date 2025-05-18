@@ -31,7 +31,7 @@ public class DatabaseBackupCLI implements Runnable {
     String usuario;
 
     @Option(names = {"--senha"}, description = "Senha do banco de dados")
-    String senha;
+    String senha = "";
 
     @Option(names = {"--nome-banco"}, description = "Nome do banco de dados")
     String nomeBanco;
@@ -41,6 +41,9 @@ public class DatabaseBackupCLI implements Runnable {
 
     @Option(names = {"--arquivo"}, description = "Caminho do arquivo de backup/restauração")
     String caminhoArquivo;
+
+    @Option(names = {"--comprimir"}, description = "Compacta o arquivo de backup (gzip/zip)")
+    boolean comprimir = false;
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new DatabaseBackupCLI()).execute(args);
@@ -58,7 +61,7 @@ public class DatabaseBackupCLI implements Runnable {
                     System.out.println("caminhoArquivo: " + caminhoArquivo);
                     boolean sucesso = backupService.executarBackup(
                         tipoBanco, host, porta, usuario, senha, nomeBanco,
-                        new File(caminhoArquivo), tipoBackup
+                        new File(caminhoArquivo), tipoBackup, comprimir
                     );
                     System.out.println(sucesso ? "Backup realizado com sucesso!" : "Falha ao realizar backup.");
                 } else {
@@ -86,6 +89,11 @@ public class DatabaseBackupCLI implements Runnable {
     }
 
     private boolean parametrosValidosBackup() {
+        System.out.println("tipoBanco: '" + tipoBanco + "'");
+        System.out.println("usuario: '" + usuario + "'");
+        System.out.println("senha: '" + senha + "'");
+        System.out.println("nomeBanco: '" + nomeBanco + "'");
+        System.out.println("caminhoArquivo: '" + caminhoArquivo + "'");
         if ("sqlite".equalsIgnoreCase(tipoBanco)) {
             return nomeBanco != null && !nomeBanco.isBlank() && caminhoArquivo != null && !caminhoArquivo.isBlank();
         }
@@ -96,7 +104,7 @@ public class DatabaseBackupCLI implements Runnable {
         }
         return tipoBanco != null && !tipoBanco.isBlank()
             && usuario != null && !usuario.isBlank()
-            && senha != null && !senha.isBlank()
+            && senha != null
             && nomeBanco != null && !nomeBanco.isBlank()
             && caminhoArquivo != null && !caminhoArquivo.isBlank();
     }
@@ -112,7 +120,7 @@ public class DatabaseBackupCLI implements Runnable {
         }
         return tipoBanco != null && !tipoBanco.isBlank()
             && usuario != null && !usuario.isBlank()
-            && senha != null && !senha.isBlank()
+            && senha != null
             && nomeBanco != null && !nomeBanco.isBlank()
             && caminhoArquivo != null && !caminhoArquivo.isBlank();
     }

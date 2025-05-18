@@ -2,9 +2,6 @@ package com.dbbackup.db;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.zip.GZIPOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
 public class MySQLConnector implements DatabaseConnector {
     private String host;
@@ -44,7 +41,7 @@ public class MySQLConnector implements DatabaseConnector {
         commandList.add("-P" + porta);
         commandList.add("-u" + usuario);
         if (senha != null && !senha.isEmpty()) {
-            commandList.add("-p" + senha);
+            commandList.add("--password=" + senha);
         }
         commandList.add(nomeBanco);
         String[] command = commandList.toArray(new String[0]);
